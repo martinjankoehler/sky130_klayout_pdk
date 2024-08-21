@@ -1633,6 +1633,10 @@ if self.respond_to?(:name)
   %w(dnwell li_con licon mcon met1_con met2_con met3_ncap met4_ncap met5_con nsd ntap_conn nwell poly_con psd ptap_conn via1 via2 via3 via4).each do |l|
     name(eval(l), l)
   end
+  
+  %w(poly_vpp li_vpp met1_vpp met2_vpp met3_vpp met4_vpp met5_vpp licon_vpp mcon_vpp via1_vpp via2_vpp via3_vpp via4_vpp).each do |l|
+    name(eval(l), l)
+  end
 end
 
 # Inter-layer
