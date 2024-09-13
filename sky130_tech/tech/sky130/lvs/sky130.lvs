@@ -1285,9 +1285,15 @@ logger.info("Starting MIM DERIVATIONS")
 
 # mim on metal3
 met3_ncap = met3_con.not(capm)
+met3_cap  = met3_con.and(capm)
+via3_ncap = via3.not(capm)
+via3_cap  = via3.and(capm)
 
-# mim on metal3
-met4_ncap = met4_con.not(capm2) # mim on metal4
+# mim on metal4
+met4_ncap = met4_con.not(capm2)
+met4_cap  = met4_con.and(capm2)
+via4_ncap = via4.not(capm2)
+via4_cap  = via4.and(capm2)
 
 
 #==================================
@@ -1630,7 +1636,7 @@ logger.info("Starting SKY130 LVS connectivity setup (Inter-layer)")
 
 # export layer names
 if self.respond_to?(:name)
-  %w(dnwell li_con licon mcon met1_con met2_con met3_ncap met4_ncap met5_con nsd ntap_conn nwell poly_con psd ptap_conn via1 via2 via3 via4).each do |l|
+  %w(dnwell li_con licon mcon met1_con met2_con met3_ncap met4_ncap met5_con nsd ntap_conn nwell poly_con psd ptap_conn via1 via2 via3_ncap via4_ncap).each do |l|
     name(eval(l), l)
   end
   
@@ -1638,7 +1644,7 @@ if self.respond_to?(:name)
     name(eval(l), l)
   end
   
-  %w(capm capm2).each do |l|
+  %w(capm capm2 met3_cap via3_cap met4_cap via4_cap).each do |l|
     name(eval(l), l)
   end
 end
@@ -1660,10 +1666,10 @@ connect(met1_con    ,          via1)
 connect(via1        ,      met2_con)
 connect(met2_con    ,          via2)
 connect(via2        ,     met3_ncap)
-connect(met3_ncap   ,          via3) 
-connect(via3        ,     met4_ncap)
-connect(met4_ncap   ,          via4)
-connect(via4        ,      met5_con)
+connect(met3_ncap   ,     via3_ncap)
+connect(via3_ncap   ,     met4_ncap)
+connect(met4_ncap   ,     via4_ncap)
+connect(via4_ncap   ,      met5_con)
 
 logger.info("Starting SKY130 LVS connectivity setup (Attaching labels)")
 
@@ -1767,12 +1773,26 @@ connect(photodiode_p, ptap_conn)
 logger.info("Starting LVS MIMCAP CONNECTIONS")
 
 # mim on metal3
-connect(capm      , via3    )
-connect(met3_ncap , met3_con)
+connect(via2     , met3_cap)
+connect(met3_cap , met3_con)
+connect(met3_cap , met3_ncap)
+connect(met3_cap , met3_label)
+connect(capm     , via3_cap)
+connect(via3_cap , met4_con)
+connect(via3_cap , met4_cap)
+connect(via3_cap , met4_ncap)
+connect(via3_cap , via3_ncap)
 
 # mim on metal4
-connect(capm2     , via4    )
-connect(met4_ncap , met4_con)
+connect(via3_cap  , met4_cap)
+connect(via3_ncap , met4_cap)
+connect(met4_cap  , met4_con)
+connect(met4_cap  , met4_ncap)
+connect(met4_cap  , met4_label)
+connect(capm2     , via4_cap)
+connect(via4_cap  , met5_con)
+connect(via4_cap  , via4_ncap)
+
 
 
 #================================
@@ -2155,12 +2175,12 @@ logger.info("Starting MIMCAP EXTRACTION")
 
 # sky130_fd_pr__model__cap_mim capacitor
 logger.info("Extracting sky130_fd_pr__model__cap_mim device")
-extract_devices(capacitor("sky130_fd_pr__model__cap_mim", 2e-15, MIMCap), { "P1" => met3_con, "P2" => capm })
+extract_devices(capacitor("sky130_fd_pr__model__cap_mim", 2e-15, MIMCap), { "P1" => met3_cap, "P2" => capm })
 
 
 # sky130_fd_pr__model__cap_mim_m4 capacitor
 logger.info("Extracting sky130_fd_pr__model__cap_mim_m4 device")
-extract_devices(capacitor("sky130_fd_pr__model__cap_mim_m4", 2e-15, MIMCap), { "P1" => met4_con, "P2" => capm2 })
+extract_devices(capacitor("sky130_fd_pr__model__cap_mim_m4", 2e-15, MIMCap), { "P1" => met4_cap, "P2" => capm2 })
 
 
 #==================================
